@@ -4,16 +4,18 @@
 
 Tässä harjoituksessa tutustuttiin Containerlabilla ja Docker-konteilla toteutettuun virtuaaliseen verkkoympäristöön. Ympäristö oli kopioitu annetusta Github-reposta jonka pystytin Windows 11 - koneelle WSL2.0 - avulla.
 
-Tehtävässä jouduin käyttämään useita, itselleni uusia komentoja joiden avulla selvitin verkkoa käyttäviä laitteita. Lähtökohtana yritin käyttää ajatusta että selvitän verkkoa pelkästään yhdestä kontista ilman pääsyä muihin kontteihin. Tässä tapauksessa valitsin ohjeissa annetun client1. Tämä tehtävä menisi todennäköisesti liian helpoksi jos käyttäisin pääsyä jokaiseen laitteeseen ja/tai alkaisin lukemaan Gitin conffaus-tiedostoja.
+Tehtävässä jouduin käyttämään useita, itselleni uusia komentoja joiden avulla selvitin verkkoa käyttäviä laitteita. Lähtökohtana yritin käyttää ajatusta että selvitän verkkoa pelkästään yhdestä kontista ilman pääsyä muihin kontteihin. Tässä tapauksessa valitsin ohjeissa annetun client1.
+
+Johtuen tehtävänannosta, tein vielä toiset versiot kaikista containerlabin topologian avulla.
 
 ---
 
 ## 2. Verkkokaavio
 
-Verkon rakennetta tutkittiin eri laitteista tehtyjen mittausten sekä reititystietojen perusteella.
+Verkon rakennetta tutkin reposta löytyvän verkkotyökalu-oppaassa (topology.md) kerrottujen komentojen antamien tulosteiden perusteella.
 
 ```mermaid
-flowchart TB
+flowchart LR
 
     subgraph USER["User LAN - 10.10.10.0/24"]
         CLIENT1["client1<br/>10.10.10.101/24"]
@@ -21,16 +23,12 @@ flowchart TB
     end
 
     subgraph SERVER["Server LAN - 10.10.20.0/24"]
-        LAITE["laite<br/>10.10.20.101"]
-        LAITE["laite<br/>10.10.20.102"]
+        SERVER1["laite<br/>10.10.20.101"]
+        SERVER2["laite<br/>10.10.20.102"]
     end
 
     subgraph MGMT["Management LAN - 10.10.99.0/24"]
-        MGMTGW["10.10.99.1"]
-        ANSIBLE["ansible"]
-        PROMETHEUS["prometheus"]
-        GRAFANA["grafana"]
-        ZABBIX["zabbix"]
+        MGMTLAITE1["10.10.99.1"]
     end
 
     subgraph BRANCH["Branch Office - 10.10.30.0/24"]
@@ -45,24 +43,91 @@ flowchart TB
     R2 --- MGMT
 ```
 
+Verkon topologia kuvattuna Containerlabin topologiasta.
+
+```mermaid
+flowchart LR
+
+    client1["client1"]
+    attacker["attacker"]
+    r1["r1"]
+    r2["r2"]
+    r3["r3"]
+    branch["branch-client"]
+
+    srv-bp["srv-bp"]
+    mgmt-bp["mgmt-bp"]
+
+    srv["Server LAN"]
+    web1["web1"]
+    db1["db1"]
+
+    mgmt["Management LAN"]
+    cadvisor["cadvisor"]
+    prometheus["prometheus"]
+    ansible["ansible"]
+    grafana["grafana"]
+    syslog["syslog"]
+    zabbix["zabbix"]
+
+    client1 --- r1
+    attacker --- r1
+
+    r1 --- r2
+    r2 --- r3
+    r3 --- branch
+
+    r2 --- srv
+    srv --- web1
+    srv --- db1
+
+    r2 --- mgmt
+    mgmt --- cadvisor
+    mgmt --- prometheus
+    mgmt --- ansible
+    mgmt --- grafana
+    mgmt --- syslog
+    mgmt --- zabbix
+```
+
 ---
 
 ## 3. Laiteluettelo
 
-| Laite | IP-osoite | Tarkoitus |
-|---|---|---|
-| r1 | 10.10.10.1 / ... | User LAN -verkon reititin |
-| r2 | ... | |
-| r3 | 10.10.30.1 / ... | Branch Office -verkon reititin |
-| client1 | 10.10.10.101 | User LAN -verkon asiakaskone |
-| attacker | ... | |
-| web1 | 10.10.20.101 | Web-palvelin |
-| db1 | 10.10.20.102 | Tietokantapalvelin |
-| branch-client | 10.10.30.101 | Branch Office -verkon asiakaskone |
-| ansible | ... | Automaation hallintapalvelin |
-| prometheus | ... | Mittaus- ja monitorointitiedon kerääminen |
-| grafana | ... | Monitorointitiedon visualisointi |
-| zabbix | ... | Verkon ja palveluiden valvonta |
+Laiteluettelo scannailun perusteella
+
+| IP-osoite | Laite | Avoimet portit | Tarkoitus |
+|---|---|---|---|
+| 10.10.10.1 | r1 | 2601,2604 |  |
+| 10.10.10.101 | client1 | 22, 9100 | Käytettävä kontti |
+| 10.10.10.254 | r1 | 2601,2604 | Sama MAC-osoite |
+| 10.10.20.1 | r2 | 2601,2604 | Reititin |
+| 10.10.20.101 | web1/db1 | 22,9100 | Jompi kumpi |
+| 10.10.20.102 | web1/db1 | 22,9100 | Jompi kumpi |
+| 10.10.30.1 | r3 | 2601,2604 | Reititin |
+| 10.10.30.101 | Branch Officen kontti |
+| 10.10.99.1 |   | 2601,2604 |   |
+| 10.255.12.1 | r1 | 2601,2604 | Yhdistelemällä useita tuloksia näyttäisi olevan r1-r2 välinen verkko |
+| 10.255.12.2 | r2 | 2601,2604 | Yhdistelemällä useita tuloksia näyttäisi olevan r1-r2 välinen verkko |
+| 10.255.23.1 | r2 | 2601,2604 | Yhdistelemällä useita tuloksia näyttäisi olevan r2-r3 välinen verkko |
+| 10.255.23.2 | r3 | 2601,2604 | Yhdistelemällä useita tuloksia näyttäisi olevan r2-r3 välinen verkko |
+
+Laiteluettelo containerlabin topologian avulla
+
+| Laite | Tarkoitus |
+|---|---|
+| r1 | User LAN -verkon reititin |
+| r2 | Yhdistää r1, r3 ja pari kytkintä joiden perässä on valvonta- ja serverikontit |
+| r3 | Branch Office -verkon reititin |
+| client1 | User LAN -verkon asiakaskontti |
+| attacker | Attacker, käytetään ilmeisesti jossain vaiheessa kun ei näy arp-taulukossa ja näyttäisi olevan portit kiinni |
+| web1 | Web-palvelin |
+| db1 | Tietokantapalvelin |
+| branch-client | Branch Officen kontti |
+| ansible | Automaation hallintakontti |
+| prometheus | Mittaus- ja monitorointitiedon keräämiseen tarkoitettu kontti |
+| grafana | Prometheuksen datan graaffiseen näyttöön tarkoitettu kontti |
+| zabbix | Verkon ja palveluiden valvontaan tarkoitettu kontti |
 
 ### Client1
 
@@ -73,7 +138,7 @@ Client1 on User LAN -verkossa sijaitseva kontti. Kontilla on kaksi verkkoa:
 | eth0 | 172.20.20.5/24 | Containerlab/Docker-hallintaverkko |
 | eth1 | 10.10.10.101/24 | User LAN |
 
-Client1:n oletusyhdyskäytävä on `10.10.10.1`, ja muihin harjoitusympäristön verkkoihin suuntautuva liikenne kulkee eth1-liitännän kautta.
+Client1:n oletusyhdyskäytävä on `10.10.10.1` joten muihin harjoitusympäristön verkkoihin suuntautuva liikenne kulkee eth1-liitännän kautta.
 
 ---
 
@@ -105,8 +170,8 @@ Ympäristössä havaittiin seuraavat verkot:
 | IP-osoite | Laite / havainto |
 |---|---|
 | 10.10.20.1 | Yhdyskäytävä |
-| 10.10.20.101 | laite (portti 9100/jetdirect auki, tulostuspalvelu?) |
-| 10.10.20.102 | laite (portti 9100/jetdirect auki, tulostuspalvelu?) |
+| 10.10.20.101 | laite |
+| 10.10.20.102 | laite |
 
 #### Branch Office – 10.10.30.0/24
 
@@ -140,6 +205,27 @@ Ympäristössä havaittiin seuraavat verkot:
 Varsinaisen harjoitusverkon lisäksi konteilla on erillinen `172.20.20.0/24`-verkko. Esimerkiksi client1 käyttää siinä osoitetta `172.20.20.5/24`.
 
 Tämä verkko on erotettu varsinaisista 10.x.x.x-harjoitusverkoista ja sitä käytetään Containerlab/Docker-ympäristön konttien hallintaan.
+
+| IP-osoite | Avoimet portit | Havainnot |
+|---|---|---|
+| 172.20.20.1 | 3000,8000,8080,9090 | Tämä viittaa googlen mukaan kontti-hostiin huomioiden ympäristön |
+| 172.20.20.2 | 22 |   |
+| 172.20.20.3 | 22 |   |
+| 172.20.20.4 | 8080 |   |
+| 172.20.20.5 | 22,9100 | Käytettävä kontti |
+| 172.20.20.6 | 22,9100 |   |
+| 172.20.20.7 | 2601,2604 | Viittaa FFRouttingiin |
+| 172.20.20.8 | 3000 | Portti 3000 viittaa grafanaan |
+| 172.20.20.9 | 22, 9100 |   |
+| 172.20.20.10 |   | Kaikki portit kiinni |
+| 172.20.20.11 | 2601,2604 | Viittaa FFRouttingiin |
+| 172.20.20.12 | 80 |   |
+| 172.20.20.13 |   | Kaikki portit kiinni |
+| 172.20.20.14 | 9090 |   |
+| 172.20.20.15 | 2601,2604 | Viittaa FFRouttingiin |
+| 172.20.20.16 | 22 |   |
+| 172.20.20.17 | 8080 |   |
+| 172.20.20.50 | 514 | Viittaa Sysloggiin |
 
 ---
 
@@ -291,9 +377,11 @@ Tässä käytin jo tehtävänannoissa käytettyjä nimiä ja verkkoja apuna topo
 
 Suurin osa ajasta meni siihen että sain ympäristön toimimaan, linkitettyä Githubiin ja tutustuessa Mermaidiin (valitsin Mermaidin sen takia että tämä koko kurssin palautukset on tarkoitus tehdä Githubiin ja Mermaidin integraatio Githubin kanssa on varsin saumaton). Linkitin sitten myös VS coden WSL:ään joten saan kirjoitettua palautukset VS codella ja pushattua ne WSL:stä suoraan Githubiin. Mermaid ei ollut tämän tehtävänannon listalla suoraan mutta siitä oli maininta jossain toisessa dokumentaatiossa (joita oli liian paljon ja liian monessa paikassa että niiden seuraaminen ja päättäminen että mitä uskoo oli ongelma).
 
-Tehtävässä käytin Chatgpt:tä apuna pitämään yllä osoite-listaa. Annoin kehoitteeksi "Älä vastaa nyt seuraaviin, kirjoitan vain itselle muistiin tähän ip-osoitteita/laitteita mitä löydän" jonka jälkeen pastesin käytettävien komentojen esim. nmap --traceroute -sn 10.10.10.0/24 tulosteita sille. Lopuksi käytin kehoitetta "Tee selvästi luettava taulukko ip-osoitteista pastetuista kehoitteista". Lopuksi, kunhan sain tehtyä omasta mielestäni selkeän reititys-taulukon/topologian niin pastesin sen chatgpt:lle ja annoin kehoitteen "Tee annetusta topologiasta Mermaidille tehty koodi käytettäväksi Githubissa". Ajanpuutteen vuoksi opettelen tuota Mermaidia myöhemmin (näytti aika selkeältä koodilta johon ei tarvitse paljoa paneutua).
+Tehtävässä käytin Chatgpt:tä apuna pitämään yllä osoite-listaa. Annoin kehoitteeksi "Älä vastaa nyt seuraaviin, kirjoitan vain itselle muistiin tähän ip-osoitteita/laitteita mitä löydän" jonka jälkeen pastesin käytettävien komentojen esim. nmap --traceroute -sn 10.10.10.0/24 tulosteita sille. Lopuksi käytin kehoitetta "Tee selvästi luettava taulukko ip-osoitteista pastetuista kehoitteista". Lopuksi, kunhan sain tehtyä omasta mielestäni selkeän reititys-taulukon/topologian niin pastesin sen chatgpt:lle ja annoin kehoitteen "Tee annetusta topologiasta Mermaidille tehty koodi käytettäväksi Githubissa".
 
-Tehtävänannossa oli tehtävään arvioitu käytettävä aika 4-8h joka ainakin tuplaantui minun tapauksessa. 
+Containerlabin topologian avulla tehdyn kuvassa en käyttänyt enään Chatgpt:n apua.
+
+Tehtävänannossa oli tehtävään arvioitu käytettävä aika 4-8h joka vähintään tuplaantui minun tapauksessa. 
 
 ### Miten dokumentaatio auttaa IT-asiantuntijaa?
 
