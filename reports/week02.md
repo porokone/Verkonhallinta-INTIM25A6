@@ -1,4 +1,4 @@
-# Viikko 2 - SNMP ja verkon perustason valvonta (Ver 0.6)
+# Viikko 2 - SNMP ja verkon perustason valvonta (Ver 0.8)
 
 ## 1. Johdanto
 
@@ -151,7 +151,27 @@ snmpget -v2c -c public web1 sysUpTime.0
 
 ---
 ## 4. Verkkorajapinnat
-SNMP:n avulla kerätyt rajapintatiedot.
+
+Seuraavilla komennoilla selviteltiin kontin rajapinnat sekä siihen liittyvät ip-osoitteet.
+
+```bash
+snmpwalk -v2c -c public web1 ifDescr
+snmpwalk -v2c -c public web1 ipAdEntIfIndex
+```
+
+Ensimmäinen antaa tulosteeksi rajapinnat ja toinen ip-osoitteet. Ne yhdistelemällä voidaan muodostaa seuraava taulu.
+
+| Nimi | Rajapinta | IP-osoite |
+|---|---|---|
+| Web1 | lo | 127.0.0.1 |
+| Web1 | eth0 | 172.20.20.10 |
+| Web1 | eth1 | 10.10.20.101 |
+| Db1 | lo | 127.0.0.1 |
+| Db1 | eth0 | 172.20.20.3 |
+| Db1 | eth1 | 10.10.20.102 |
+| Branch-client | lo | 127.0.0.1 |
+| Branch-client | eth0 | 172.20.20.8 |
+| Branch-client | eth1 | 10.10.30.101 |
 
 ---
 ## 5. OID-analyysi
