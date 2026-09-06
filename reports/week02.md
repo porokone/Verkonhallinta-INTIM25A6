@@ -1,4 +1,4 @@
-# Viikko 2 - SNMP ja verkon perustason valvonta (Ver 0.8)
+# Viikko 2 - SNMP ja verkon perustason valvonta (Ver 1.0)
 
 ## 1. Johdanto
 
@@ -143,11 +143,11 @@ snmpget -v2c -c public web1 sysDescr.0
 snmpget -v2c -c public web1 sysUpTime.0
 ```
 
-| Kontin nimi | Kuvaus | Käyttöaika |
-|---|---|---|
-| web1 | Linux web1 6.18.33.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026 x86_64 | 4:17:29.09 |
-| db1 | Linux db1 6.18.33.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026 x86_64 | 2:22:43.17 |
-| branch-client | Linux branch-client 6.18.33.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026 x86_64 | 2:11:48.37 |
+| Laite | Nimi | Käyttäjärjestelmä | Uptime |
+|---|---|---|---|
+| web1 | web1 | Linux web1 6.18.33.2-microsoft-standard-WSL2 | 4:17:29.09 |
+| db1 | db1 | Linux db1 6.18.33.2-microsoft-standard-WSL2 | 2:22:43.17 |
+| branch-client | branch-client | Linux branch-client 6.18.33.2-microsoft-standard-WSL2 | 2:11:48.37 |
 
 ---
 ## 4. Verkkorajapinnat
@@ -175,10 +175,37 @@ Ensimmäinen antaa tulosteeksi rajapinnat ja toinen ip-osoitteet. Ne yhdistelem�
 
 ---
 ## 5. OID-analyysi
-OID-objektien käyttötarkoitus.
+
+| OID | Tarkoitus |
+|---|---|
+| sysName.0 | Laitteen nimi |
+| sysDescr.0 | Järjestelmän kuvaus |
+| sysUpTime.0 | Aika, kauan järjestelmä on ollut käynnissä |
+| ifDescr | Antaa rajapintojen nimet |
+| ifOperStatus | Näyttää rajapintojen tilan |
 
 ---
 ## 6. Pohdinta
-Omat havainnot SNMP:n hyödyistä ja rajoituksista.
+
+### 1. Mitä hyötyä SNMP:stä on verkonhallinnassa?
+
+SNMP:n avulla voi kerätä jokaisen kriittisen laitteen valvonnan kannalta tärkeitä tietoja keskitetysti ja havaita esimerkiksi suuria liikennemääriä tai rajapintojen putoamisia jolloin voidaan keskittää verkon parannukset oikeasti sinne missä niitä tarvitaan eikä tarvitse arpoa missä ne ongelmat ovat.
+
+### 2. Mitä tietoa SNMP:n avulla voidaan kerätä?
+
+Ihan laitteen nimestä rajapintojen tilojen seuraamiseen ja rajapintojen liikenteen määrästä eri komponenttien käyttöasteeseen. Riippuu paljon käytettävästä laitteesta.
+
+### 3. Mitä ongelmia yhteisöpohjaisessa SNMPv2:ssa on?
+
+Isoin ongelma on että se ei tarjoa salausta tai käyttäjäkohtaista tunnistautumista vaan lähettää tiedot salaamattomana verkossa.
+
+### 4. Missä tilanteissa käyttäisit mieluummin SNMPv3:a?
+
+Tuotantoverkossa ja tietoturvan kannalta tärkeissä ympäristöissä.
+
+### Omaa pohdintaa
+
+Isoin kysymysmerkki tuli tosiaan tietoturvan kannalta SNMPv2:sen ja SNMPv3:sen suhteen.
+SNMPv2 kuitenkin tarjoaa ison tietoturvariskin verkkoon jos hyökkääjä pääsee siihen käsiksi koska sitä kautta voi kartoittaa käytännössä koko verkon mihin ei välttämättä muuten olisi mahdollisuutta.
 
 ---
