@@ -1,4 +1,4 @@
-# Viikko 2 - SNMP ja verkon perustason valvonta (Ver 0.3)
+# Viikko 2 - SNMP ja verkon perustason valvonta (Ver 0.4)
 
 ## 1. Johdanto
 
@@ -40,12 +40,78 @@ Sieltä etsin seuraavan kohdan
 ```text
 SECTION: Access Control Setup
 ```
+
 Jonka alle lisäsin seuraavan
+
 ```text
 view   systemonly  included   .1.3.6.1.2
 ```
 
+Sitten lisätään ip-osoite agentin osoitteeksi. Eli etsin seuraavan kohdan.
 
+```text
+agentaddress  127.0.0.1,[::1]
+```
+
+Sen perään lisäsin kyseisen kontin 172. - verkon osoitteen. Tässä tapauksessa käytän esimerkkinä branch-clientin osoitetta.
+
+```text
+agentaddress  127.0.0.1,[::1],172.20.20.8
+```
+
+Tallennetaan ja poistutaan nano editorista
+Ctrl + s (tallentaa)
+Ctrl + x (poistuu)
+
+Seuraavaksi muokataan samassa hakemistossa olevaa snmp.conf
+
+```bash
+nano etc/snmp/snmp.conf
+```
+
+Etsitään sieltä seuraava kohta
+
+```text
+mibs :
+```
+
+Muutetaan se muotoon
+
+```text
+# mibs :
+```
+
+tallennetaan ja poistutaan.
+
+Sitten vielä ladataan snmp-mibs-downloader
+
+```bash
+apt install snmp-mibs-downloader
+```
+
+Seuraavaksi käynnistetään uudestaan snmpd-palvelu.
+
+```bash
+service snmpd restart
+```
+
+Sen jälkeen seuraavilla komennoilla voidaan tarkistaa onko palvelu päällä
+
+```bash
+service snmpd status
+```
+
+ja mitä osoitetta se käyttää
+
+```bash
+ss -lunp | grep 161
+```
+pitäisi tulla esimerkiksi seuraavanlaisia osoitteita tulosteeksi
+```text
+UNCONN 0      0        172.20.20.8:161        0.0.0.0:*    users:(("snmpd",pid=4782,fd=9))
+UNCONN 0      0          127.0.0.1:161        0.0.0.0:*    users:(("snmpd",pid=4782,fd=7))
+UNCONN 0      0              [::1]:161           [::]:*    users:(("snmpd",pid=4782,fd=8))
+```
 
 ---
 ## 3. Kerätyt tiedot
