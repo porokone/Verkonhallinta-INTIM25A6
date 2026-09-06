@@ -1,4 +1,4 @@
-# Viikko 2 - SNMP ja verkon perustason valvonta (Ver 0.4)
+# Viikko 2 - SNMP ja verkon perustason valvonta (Ver 0.6)
 
 ## 1. Johdanto
 
@@ -59,9 +59,8 @@ Sen perään lisäsin kyseisen kontin 172. - verkon osoitteen. Tässä tapaukses
 agentaddress  127.0.0.1,[::1],172.20.20.8
 ```
 
-Tallennetaan ja poistutaan nano editorista
-Ctrl + s (tallentaa)
-Ctrl + x (poistuu)
+Tallennetaan ja poistutaan nano editorista,
+Ctrl + s (tallentaa) ja Ctrl + x (poistuu)
 
 Seuraavaksi muokataan samassa hakemistossa olevaa snmp.conf
 
@@ -113,9 +112,42 @@ UNCONN 0      0          127.0.0.1:161        0.0.0.0:*    users:(("snmpd",pid=4
 UNCONN 0      0              [::1]:161           [::]:*    users:(("snmpd",pid=4782,fd=8))
 ```
 
+### Snmp:n asennus ansible-konttiin
+
+Asennetaan snmp ja samalla tavalla kuin asennettiin valvottaviin kohteisiinkin, asennetaan snmp-mibs-downloader myös ja muokataan snmp.conf samalla tavalla kuin yllä on kerrottu.
+
+Sitten voidaan kokeilla hakea tietoja suoraan agenteilta.
+
+```bash
+snmpget -v2c -c public web1 sysName.0
+snmpget -v2c -c public db1 sysName.0
+snmpget -v2c -c public branch-client sysName.0
+```
+
+ja tulosteiksi pitäisi tulla
+
+```text
+SNMPv2-MIB::sysName.0 = STRING: web1
+SNMPv2-MIB::sysName.0 = STRING: db1
+SNMPv2-MIB::sysName.0 = STRING: branch-client
+```
+
 ---
 ## 3. Kerätyt tiedot
-Kuvaukset ja tulosteet.
+
+Tietojen keräykseen käytettiin seuraavia komentoja (muokkaa kontin nimeä tarvittaessa)
+
+```bash
+snmpget -v2c -c public web1 sysName.0
+snmpget -v2c -c public web1 sysDescr.0
+snmpget -v2c -c public web1 sysUpTime.0
+```
+
+| Kontin nimi | Kuvaus | Käyttöaika |
+|---|---|---|
+| web1 | Linux web1 6.18.33.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026 x86_64 | 4:17:29.09 |
+| db1 | Linux db1 6.18.33.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026 x86_64 | 2:22:43.17 |
+| branch-client | Linux branch-client 6.18.33.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026 x86_64 | 2:11:48.37 |
 
 ---
 ## 4. Verkkorajapinnat
