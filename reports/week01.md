@@ -1,4 +1,4 @@
-# Viikko 1 – Verkon dokumentointi (Ver 1.0)
+# Viikko 1 – Verkon dokumentointi (Ver 1.1)
 
 ## 1. Johdanto
 
@@ -54,8 +54,10 @@ flowchart LR
     r1r2["R1-R2 LAN</br>10.255.12.1 - 10.255.12.2"]
     r2["R2</br>10.10.20.1"]
     r2r3["R2-R3 LAN</br>10.255.23.1 - 10.255.23.2"]
-    r3["R3</br>10.10.30.1"]
-    branch["Branch-client</br>10.10.30.101"]
+    subgraph BRANCH["Branch Office LAN - 10.10.30.0/24"]
+        r3["R3</br>10.10.30.1"]
+        branch["Branch-client</br>10.10.30.101"]
+    end
 
     srv-bp["Srv-bp"]
     mgmt-bp["Mgmt-bp"]
