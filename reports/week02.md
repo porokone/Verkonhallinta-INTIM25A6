@@ -1,4 +1,4 @@
-# Viikko 2 - SNMP ja verkon perustason valvonta (Ver 1.0)
+# Viikko 2 - SNMP ja verkon perustason valvonta (Ver 1.1)
 
 ## 1. Johdanto
 
@@ -13,7 +13,7 @@ IBM:n määrittelyn mukaan SNMP on avoin arkkitehtuuri jonka avulla verkon laitt
 
 Jokaiseen kohteeseen (web1, db1 ja branch-client) asennettiin snmp-agentti seuraavilla komennoilla. Samalla asennettiin tarvittavia työkaluja ja nano-editori.
 
-Snmp-agentin asennus
+Snmp-agentin asennus (tässä snmp on työkalu-kokoelma jolla haetaan agentilta tietoja ja snmpd on itse agentti)
 ```bash
 apt update && apt install snmp snmpd -y
 ```
@@ -23,7 +23,7 @@ IP työkalujen ja nano-editorin asennus
 apt install nano net-tools iputils-ping -y
 ```
 
-Seuraavaksi pitää tarkistaa kontin ip-osoite, joka lisätään snmp:n ip-listaan. Tässä harjoituksessa käytin Management LANin verkkoa 172.20.20.0/24 joka löytyi konteista eth0:sta.
+Seuraavaksi pitää tarkistaa kontin ip-osoite, joka lisätään snmp:n ip-listaan. Tässä harjoituksessa käytin konttien hallintaverkkoa 172.20.20.0/24 joka löytyi konteista eth0:sta.
 
 ```bash
 ip a
@@ -32,7 +32,7 @@ ip a
 Seuraavaksi muutettiin tai lisättiin seuraavat kohdat etc/snmp/ hakemistossa sijaitsevaan snmpd.conf
 
 ```bash
-nano etc/snmp/snmpd.conf
+nano /etc/snmp/snmpd.conf
 ```
 
 Sieltä etsin seuraavan kohdan
@@ -41,7 +41,7 @@ Sieltä etsin seuraavan kohdan
 SECTION: Access Control Setup
 ```
 
-Jonka alle lisäsin seuraavan
+Jonka alle lisätään mgmt-haara joka sisältää kaikki tärkeimmät tietueet rajapinnoista, ip:stä, järjestelmästä yms.
 
 ```text
 view   systemonly  included   .1.3.6.1.2
@@ -65,7 +65,7 @@ Ctrl + s (tallentaa) ja Ctrl + x (poistuu)
 Seuraavaksi muokataan samassa hakemistossa olevaa snmp.conf
 
 ```bash
-nano etc/snmp/snmp.conf
+nano /etc/snmp/snmp.conf
 ```
 
 Etsitään sieltä seuraava kohta
@@ -74,7 +74,7 @@ Etsitään sieltä seuraava kohta
 mibs :
 ```
 
-Muutetaan se muotoon
+Muutetaan se muotoon (käytetään seuraavana ladattavaa snmp-mibs-downloader - pakettia muuttamaan numeeriset OIDit nimi-muotoon)
 
 ```text
 # mibs :
@@ -114,7 +114,7 @@ UNCONN 0      0              [::1]:161           [::]:*    users:(("snmpd",pid=4
 
 ### Snmp:n asennus ansible-konttiin
 
-Asennetaan snmp ja samalla tavalla kuin asennettiin valvottaviin kohteisiinkin, asennetaan snmp-mibs-downloader myös ja muokataan snmp.conf samalla tavalla kuin yllä on kerrottu.
+Asennetaan pelkästään snmp samalla tavalla kuin asennettiin valvottaviin kohteisiinkin, asennetaan snmp-mibs-downloader myös ja muokataan snmp.conf samalla tavalla kuin yllä on kerrottu.
 
 Sitten voidaan kokeilla hakea tietoja suoraan agenteilta.
 
@@ -159,7 +159,7 @@ snmpwalk -v2c -c public web1 ifDescr
 snmpwalk -v2c -c public web1 ipAdEntIfIndex
 ```
 
-Ensimmäinen antaa tulosteeksi rajapinnat ja toinen ip-osoitteet. Ne yhdistelemällä voidaan muodostaa seuraava taulu.
+Ensimmäinen antaa tulosteeksi rajapinnat ja niiden tunnisteet. Toinen ip-osoitteet ja rajapinta-tunnisteet. Ne yhdistelemällä voidaan muodostaa seuraava taulu.
 
 | Nimi | Rajapinta | IP-osoite |
 |---|---|---|
@@ -197,7 +197,7 @@ Ihan laitteen nimestä rajapintojen tilojen seuraamiseen ja rajapintojen liikent
 
 ### 3. Mitä ongelmia yhteisöpohjaisessa SNMPv2:ssa on?
 
-Isoin ongelma on että se ei tarjoa salausta tai käyttäjäkohtaista tunnistautumista vaan lähettää tiedot salaamattomana verkossa.
+Isoin ongelma on että se ei tarjoa salausta tai käyttäjäkohtaista tunnistautumista vaan lähettää liikenteen ja community stringin salaamattomana verkossa joiden kaappaaminen mahdollistaa niiden luvun.
 
 ### 4. Missä tilanteissa käyttäisit mieluummin SNMPv3:a?
 
@@ -206,6 +206,11 @@ Tuotantoverkossa ja tietoturvan kannalta tärkeissä ympäristöissä.
 ### Omaa pohdintaa
 
 Isoin kysymysmerkki tuli tosiaan tietoturvan kannalta SNMPv2:sen ja SNMPv3:sen suhteen.
-SNMPv2 kuitenkin tarjoaa ison tietoturvariskin verkkoon jos hyökkääjä pääsee siihen käsiksi koska sitä kautta voi kartoittaa käytännössä koko verkon mihin ei välttämättä muuten olisi mahdollisuutta.
+SNMPv2 kuitenkin tarjoaa ison tietoturvariskin verkkoon jos hyökkääjä pääsee siihen käsiksi koska sitä kautta voi esimerkiksi kartoittaa koko verkon topologian jos agentit on määritelty antamaan kaikki tiedot.
+Pitää määritellä jokaiselta koneelta vain tarvittavat tiedot jakoon eikä vain pistetä kaikkia saataville.
+
+Toinen asia mikä tuottaa enemmän ongelmia varsinkin näin aloittelijalle on OIDien ymmärtäminen. Siinä on pelkkä numerosarja ja vaikka ne käännettäisiin vastaamaan nimiä niin houkutus on suuri laittaa vaan kaikki mahdolliset jakoon ja lukea mitä tarvitaan. Tässä päästään takaisin ensimmäiseen ongelmaan tietoturvan puolelta.
+
+Mutta sitten herää kysymys että miksi käyttää ylipäätänsä v2:sta? Helppous on ehkä ainoa asia mikä tulee mieleen ja onko v3:selle tukea vanhoissa laitteissa?
 
 ---
