@@ -75,25 +75,9 @@ curl http://localhost:9100/metrics
 
 Jos vastaukseksi saadaan todella pitkä lista jossa on esimerkiksi seuraavanlaista tietoa
 
-```text
-node_cpu_seconds_total{cpu="31",mode="iowait"} 2.63
-node_cpu_seconds_total{cpu="31",mode="irq"} 0
-node_cpu_seconds_total{cpu="31",mode="nice"} 0
-node_cpu_seconds_total{cpu="31",mode="softirq"} 0.04
-node_cpu_seconds_total{cpu="31",mode="steal"} 0
-node_cpu_seconds_total{cpu="31",mode="system"} 7.1
-node_cpu_seconds_total{cpu="31",mode="user"} 6.7
-```
+![Osakaappaus Node exportter - listasta](images/node_exporter_list.png)
 
-Niin Node exportteri on toiminnassa
-
-### 2.3 Node Exporterin testaus
-
-- Toiminnan tarkistaminen
-- Portti 9100
-- `/metrics`-rajapinnan tarkastelu
-- Mitä mittareita Node Exporter tarjoaa?
-- Asennuksen aikana tehdyt havainnot / ongelmat
+niin Node exportteri on toiminnassa
 
 ## 3. Prometheus
 
