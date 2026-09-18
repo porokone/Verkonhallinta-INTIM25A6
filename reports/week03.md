@@ -1,4 +1,4 @@
-# Viikko 3 – Monitorointi Prometheuksella ja Grafanalla
+# Viikko 3 – Monitorointi Prometheuksella ja Grafanalla (ver 0.5)
 
 ## 1. Johdanto
 
@@ -81,42 +81,26 @@ niin Node exportteri on toiminnassa
 
 ## 3. Prometheus
 
-### 3.1 Kohteiden lisääminen
+Prometheus voidaan avata kontti-ympäristöä ajavalla koneella menemällä selaimella osoitteeseen
 
-- Mitä kohteita Prometheus valvoo?
-- Mitä exportereita käytetään?
-- Prometheuksen konfiguraatio
+```dash
+http://localhost:9090/
+```
 
-### 3.2 Targets
+Sen pitäisi avata vastaavanlainen näkymä kuin alla. Valitaan ylhäältä Status -> Target health ja sen jälkeen voidaan suodattaa tulokset valitsemalla UP
 
-- Targets-sivun tarkastelu
-- Kohteiden UP/DOWN-tila
-- Havainnot
+![Kuvakaappaus Prometheuksesta](images/prometheus_check.png)
 
-### 3.3 PromQL-kyselyt
+Kuten tästä nähdään, kohde web1 on ylhäällä ja siitä saadaan kaavittua tietoja.
 
-Esitä vähintään kolme PromQL-kyselyä.
+## 4. Grafana
 
-Jokaisesta:
-- käytetty kysely
-- mitä kysely mittaa/palauttaa
-- miksi tieto on hyödyllinen
-- havainnot tuloksista
+### 4.1 Kojelauta
 
-## 4. Grafana Dashboard
+Grafanaan lisättiin opettajan antamat PromQL - elementit. Niillä voi seurata suorittimen, levytilan ja muistin käyttöastetta sekä verkkoliitäntöjen liikennettä.
 
-### 4.1 Dashboardin rakentaminen
+![Kuvakaappaus Grafanan kojelaudasta](images/grafana-dashboard.png)
 
-- Grafanan yhdistäminen Prometheukseen
-- Valitut mittarit
-- Miksi juuri nämä mittarit ovat hyödyllisiä?
-
-### 4.2 Dashboard-näkymät
-
-- Vähintään kaksi dashboard-näkymää
-- Kuvakaappaukset
-- Mitä näkymissä visualisoidaan?
-- Koko dashboardin kuvakaappaus
 
 ## 5. Kuormitustesti ja havainnot
 
