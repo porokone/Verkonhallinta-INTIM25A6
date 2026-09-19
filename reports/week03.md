@@ -1,4 +1,4 @@
-# Viikko 3 – Monitorointi Prometheuksella ja Grafanalla (ver 1.0)
+# Viikko 3 – Monitorointi Prometheuksella ja Grafanalla (ver 1.01)
 
 ## 1. Johdanto
 
@@ -151,10 +151,13 @@ Vähän epäreilu vertailu kun minusta molemmat on tarkoitettu eri tarkoituksiin
 ## 7. Yhteenveto ja pohdinta
 
 Kerroinkin edellisessä kohdassa jo niiden eroista ja miksi niitä ei minusta pitäisi verrata keskenään joten en tässä pureudu siihen vaan käsittelen enemmän Prometheusta.
+
 Käytän itse työssäni paljon trendidatan seurantaa niin osaan arvostaa jatkuvaa datan seurantaa. Kun oppii seuraamaan omaa järjestelmää niin niistä näkee heti poikkeukset ja jopa syyt miksi jotain tapahtuu. Yleensä aloitan päivän katsomalla tärkeimmät trendit omalta laitokselta jolloin näen jo heti jos joku vaatii huomiota.
+
 PromQL kyselykielestä tuli mieleeni heti SQL kyselykieli koska niiden syötteet oli hyvinkin samankaltaisia. Tietenkin täysin erilaisia koska toinen käsittelee aikajanaa ja toinen relaatiotietokantaan. Niiden käsittely tuntui yllättävänkin luontevalta.
 Sinänsä Prometheus+Grafana yhdistelmä tarjoaa hyvän pohjan seurata vain niitä mittareita jotka ovat tärkeitä kohteen luonteesta riippuen. Tarvitaanko joltain tiedostopalvelimelta suorittimen käyttöastetta seurantaan vai keskitytäänkö sen verkkoliikenteen ja levyn seurantaan? Liian paljon mittareitakin saattaa aiheuttaa niiden tärkeimpien mittareiden piiloon menemisen niin kuten edellisellä viikolla SNMP:stä sanoin, pätee myös tässäkin että kohteesta tarvitaan ne tiedot jotka on tärkeimpiä. 
 Jos tarvitaan selvitellä jotain niin se on helppo tarkistaa PromQL:llä tai tehdä siitä mittari koska Prometheus on pitänyt tietokannan kuitenkin tiedoista.
+
 Jos pitäisi joku esimerkki sanoa että miten se auttaa vianetsinnässä niin esimerkiksi voidaan katsoa verkkoliitäntöjen käyttöastetta ja huomata että jos jonku kontin läpi pitäisi mennä liikennettä ja huomataan että yhden verkkoliitännän liikenne pysähtyy niin voidaan heti kohdentaa vianetsintä sinne.
 
 
