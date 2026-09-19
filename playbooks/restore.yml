@@ -1,0 +1,10 @@
+---
+- name: restore config
+  hosts: routers
+  gather_facts: false
+
+  tasks:
+    - name: korvataan config backupista
+      cisco.ios.ios_config:
+        # replace: config
+        src: "../backups/{{ inventory_hostname }}.backup.cfg"
