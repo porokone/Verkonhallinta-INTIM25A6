@@ -122,18 +122,7 @@ git --version
 ```
 
 ---
-
-## 2. Asenna Docker
-
-Tarkista toiminta:
-
-```bash
-docker version
-```
-
----
-
-## 3. Asenna Containerlab
+## 2. Asenna Containerlab
 
 huomaa, tämä asentaa docker engine CEn koneelle, jollei koneelta löydy docker binääriä
 
@@ -145,6 +134,16 @@ Tarkista asennus:
 
 ```bash
 containerlab version
+```
+
+---
+
+## 3. Varmista Docker asennuksen olemassa olo
+
+Tarkista toiminta:
+
+```bash
+docker version
 ```
 
 ---
@@ -166,13 +165,13 @@ cd Verkonhallinta
 Käynnistä ympäristö:
 
 ```bash
-containerlab deploy -t golden.clab.yml
+sudo scripts/deploy.sh
 ```
 
 Tarkista tila:
 
 ```bash
-containerlab inspect -t golden.clab.yml
+sudo scripts/status.sh
 ```
 
 ---
