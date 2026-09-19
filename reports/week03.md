@@ -1,4 +1,4 @@
-# Viikko 3 – Monitorointi Prometheuksella ja Grafanalla (ver 0.5)
+# Viikko 3 – Monitorointi Prometheuksella ja Grafanalla (ver 1.0)
 
 ## 1. Johdanto
 
@@ -106,39 +106,55 @@ Grafanaan lisättiin opettajan antamat PromQL - elementit. Niillä voi seurata s
 
 ### 5.1 Kuormitustestin toteutus
 
-- Miten kuormitus tuotettiin?
-- Mitä palvelinta/kohdetta kuormitettiin?
-- Mitä mittareita seurattiin?
+Kuormitustestissä kokeiltiin kahdenlaista erilaista tapaa. Toinen kuormittaa suorittimia ja toinen levytilaa.
 
-### 5.2 Mittareiden käyttäytyminen
+Prosessorin kuormitus toteutettiin asentamalla stress-ng alla olevalla käskyllä
 
-- CPU
-- muisti
-- verkko
-- muut valitut mittarit
-- Kuvakaappaukset ennen kuormitusta / kuormituksen aikana
+```bash
+apt install stress-ng
+```
+
+jonka jälkeen sillä rasitettiin neljää suoritinta 60s ajan käskyllä
+
+```bash
+stress-ng --cpu 4 --timeout 60
+```
+
+Levytilaa testattiin kirjoittamalla 500Mt kokoinen tiedosto nollia täyteen seuraavanlaisella komennolla
+
+```bash
+dd if=/dev/zero of=testfile.img bs=1M count=500
+```
+
+Alla on kuvakaappaus mittareista joissa näkyy miten prosessorin 5m keskiarvo on noussut sen aikana sekä 500Mt tiedoston kirjoituksen ja poiston vaikutus vapaaseen levytilaan.
+
+![Kuvakaappaus Grafanan kojelaudasta rasitustestissä](images/grafana-stress-tests.png)
 
 ### 5.3 Havainnot monitoroinnista
 
-- Miten kuormitus näkyi Prometheuksessa ja Grafanassa?
-- Löytyikö poikkeamia tai muita mielenkiintoisia havaintoja?
-- Mitä johtopäätöksiä mittausten perusteella voidaan tehdä?
+Suorittimen käyttöasteessa huomasin heti alkuun ongelmia. Eli se alkuun näytti tasasista n. -9% joka ei tietenkään voi olla mahdollista. Tarkistin kaavat, ajoin konteissa erilaisia testejä joilla mittasin suorittimen tuottamia arvoja ajan suhteen että löytäisin poikkeavuuksia mutta kaikki testit näytti menevän hyvin ja poikkeavuuksia ei löytynyt. Prometheuksesta kun ajoin testejä niin kaikki näytti oikein mutta käytännössä samoja arvoja ja melkein samoja suoritteita käyttäen Grafana halusi näyttää -9%. Tämä jäi mysteeriksi koska aikaa alkoi kulumaan liikaa.
+
+Itse kuormitustestit näkyi selvästi suorittimen 5m keskiarvon nousuna. Kuten myös imagen kirjoitus ja poisto näkyi selvästi levyä seuraavassa mittarissa.
 
 ## 6. SNMP vs. Prometheus
 
-- SNMP:n ja Prometheuksen toimintaperiaatteiden erot
-- Push/pull-toimintamallit
-- Mitä tietoa kummallakin voidaan kerätä?
-- Käyttökohteet
-- Vahvuudet ja rajoitukset
+| Ominaisuus | SNMP | Prometheus |
+| Tiedonkeruu | SNMP kyselee agentilta tietoja | Prometheus hakee (kaapii) tiedot rajapinnasta |
+| Käyttöönotto | Suht helppo peruskäyttöönotto | Suht helppo peruskäyttöönotto |
+| Mittarien määrä | Riippuu paljon laitteesta mitä se tukee | Kaappaa kaiken pitä exportteri sille eteen tuo |
+| Visualisointi | SNMP ei tuota visualisointia | Prometheuksessa saa PromQL kyselyn graaffisena |
+| Hälytysmahdollisuudet | Saa trappeja mutta vaatii lisäosia | Saa helpommin määritettyjä rajoja ja ilmoituksia (Alertmanager) |
+| Soveltuvuus pilviympäristöihin | Huono | Erinomainen |
 
-Vertailutaulukko ja johtopäätökset.
+Vähän epäreilu vertailu kun minusta molemmat on tarkoitettu eri tarkoituksiin. Molemmat vaatii toimiakseen muutakin kuin pelkän SNMPn tai Prometheuksen. SNMP on pelkkä protokolla, jota edelleen tuetaan ja jolla on oma paikkansa joka minusta on enemmän perinteisten verkkojen ja jopa uusien verkkolaitteiden valvonnassa kun taas Prometheus on iso ekosysteemi joka pitää sisällään jo tietokannan, PromQL kyselykielen, hälytysjärjestelmän jne. yhdessä paketissa joka toimii erinomaisesti (ja ilmeisesti suunniteltukin) pilvi- ja konttiympäristössä, mutta vaatii kuitenkin exportterit ja tässäkin käytetyn Grafanan. Tästä lukiessani yleensä kaikki oli niputettu yhdeksi ja samaksi.
 
 ## 7. Yhteenveto ja pohdinta
 
-- Mitä opit harjoituksesta?
-- Mitä monitorointiympäristöstä opittiin käytännössä?
-- Mitkä ovat Prometheuksen vahvuudet?
-- Millaisiin ympäristöihin Prometheus soveltuu erityisen hyvin?
-- Mitä haasteita tai rajoituksia ratkaisussa on?
-- Miten Prometheus/Grafana-ratkaisua voisi kehittää edelleen?
+Kerroinkin edellisessä kohdassa jo niiden eroista ja miksi niitä ei minusta pitäisi verrata keskenään joten en tässä pureudu siihen vaan käsittelen enemmän Prometheusta.
+Käytän itse työssäni paljon trendidatan seurantaa niin osaan arvostaa jatkuvaa datan seurantaa. Kun oppii seuraamaan omaa järjestelmää niin niistä näkee heti poikkeukset ja jopa syyt miksi jotain tapahtuu. Yleensä aloitan päivän katsomalla tärkeimmät trendit omalta laitokselta jolloin näen jo heti jos joku vaatii huomiota.
+PromQL kyselykielestä tuli mieleeni heti SQL kyselykieli koska niiden syötteet oli hyvinkin samankaltaisia. Tietenkin täysin erilaisia koska toinen käsittelee aikajanaa ja toinen relaatiotietokantaan. Niiden käsittely tuntui yllättävänkin luontevalta.
+Sinänsä Prometheus+Grafana yhdistelmä tarjoaa hyvän pohjan seurata vain niitä mittareita jotka ovat tärkeitä kohteen luonteesta riippuen. Tarvitaanko joltain tiedostopalvelimelta suorittimen käyttöastetta seurantaan vai keskitytäänkö sen verkkoliikenteen ja levyn seurantaan? Liian paljon mittareitakin saattaa aiheuttaa niiden tärkeimpien mittareiden piiloon menemisen niin kuten edellisellä viikolla SNMP:stä sanoin, pätee myös tässäkin että kohteesta tarvitaan ne tiedot jotka on tärkeimpiä. 
+Jos tarvitaan selvitellä jotain niin se on helppo tarkistaa PromQL:llä tai tehdä siitä mittari koska Prometheus on pitänyt tietokannan kuitenkin tiedoista.
+Jos pitäisi joku esimerkki sanoa että miten se auttaa vianetsinnässä niin esimerkiksi voidaan katsoa verkkoliitäntöjen käyttöastetta ja huomata että jos jonku kontin läpi pitäisi mennä liikennettä ja huomataan että yhden verkkoliitännän liikenne pysähtyy niin voidaan heti kohdentaa vianetsintä sinne.
+
+
