@@ -1,4 +1,4 @@
-# Viikko 3 – Monitorointi Prometheuksella ja Grafanalla (ver 1.02)
+# Viikko 3 – Monitorointi Prometheuksella ja Grafanalla (ver 1.03)
 
 ## 1. Johdanto
 
@@ -138,7 +138,6 @@ Itse kuormitustestit näkyi selvästi suorittimen 5m keskiarvon nousuna. Kuten m
 
 ## 6. SNMP vs. Prometheus
 
-|---|---|---|
 | Ominaisuus | SNMP | Prometheus |
 |---|---|---|
 | Tiedonkeruu | SNMP kyselee agentilta tietoja | Prometheus hakee (kaapii) tiedot rajapinnasta |
