@@ -33,7 +33,7 @@
       notify: restart snmpd
 
     - name: Enable SNMP service
-      service:
+      ansible.builtin.sysvinit:
         name: snmpd
         enabled: yes
         state: started
@@ -50,6 +50,6 @@
   handlers:
 
     - name: restart snmpd
-      service:
+      ansible.builtin.sysvinit:
         name: snmpd
         state: restarted
