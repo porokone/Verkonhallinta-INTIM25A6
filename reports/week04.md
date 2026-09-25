@@ -1,4 +1,4 @@
-# Viikko 4 – Ansible ja Infrastructure as Code (v1.0)
+# Viikko 4 – Ansible ja Infrastructure as Code (v1.01)
 
 ## 1. Johdanto
 
@@ -142,8 +142,8 @@ Kokeilin näitä kerätä ensin ansiblen setupilla ja sen perään kokeilin debu
 
 Näin sain helposti kerättyä vaaditut tiedot taulukkoa varten
 
-|---|---|---|---|---|
 | Name | IP | OS | CPU Cores | Memory |
+|---|---|---|---|---|
 | client1 | 10.10.10.101 | Ubuntu 24.04 | 16 | 30901 MB |
 | attacker | 10.10.10.200 | Kali 2026.3 | 16 | 30901 MB |
 | web1 | 10.10.20.101 | Ubuntu 24.04 | 16 | 30901 MB |
