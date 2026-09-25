@@ -1,8 +1,8 @@
-# Viikko 4 – Ansible ja Infrastructure as Code (v0.4)
+# Viikko 4 – Ansible ja Infrastructure as Code (v1.0)
 
 ## 1. Johdanto
 
-Infrastructure as Code (IaC) tarkoittaa infrastruktuurin/koneryhmien määrittelyä, tekoa ja hallintaa koodin tai kirjoitettujen kehoitteiden avulla ilman käsin tehtävää asentelua/määrittelyä. IaC poistaa käsin tehtäviä virheitä ja nopeuttaa isojen kokonaisuuksien hallintaa kun voidaan ajaa samat määrittelyt niin pienille kuin isoillekin ryhmille kerralla.
+Infrastructure as Code (IaC) tarkoittaa infrastruktuurin/koneryhmien määrittelyä, tekoa ja hallintaa koodin tai kirjoitettujen kehoitteiden avulla ilman käsin tehtävää asentelua/määrittelyä. IaC poistaa käsin tehtäviä virheitä ja nopeuttaa isojen kokonaisuuksien hallintaa kun voidaan ajaa samat määrittelyt niin pienille kuin isoillekin ryhmille kerralla kunhan ajettavat määritystiedostot ovat huolellisesti testatut ettei monisteta virhettä kaikkiin.
 
 Ansible on avoimen lähdekoodin työkalu jonka avulla voidaan toteuttaa IaC periaatetta. Red Hat omistaa Ansible - tuotemerkin, tukee laajasti ansiblen kehitystä ja tarjoaa omaa Ansible automaatioalustaa maksullisella tilauksella mutta avoimeen lähdekoodiin perustuva ansible on kaikkien vapaasti käytettävä. Ansible rakentuu vahvasti inventoryn ja playbookkien ympärille mutta ansiblea voidaan käyttää myös ilman niitä.
 Inventoryllä voidaan määritellä ja jaotella hallittavat koneet ja laitteet jolloin voidaan ajaa tarvittavia komentoja/suoritteita (playbookkeja) kohdennetusti joko kaikille tai esimerkiksi pelkästään jollekin tietylle osiolle/kohteelle joka on määritelty inventoryssä.
@@ -10,7 +10,7 @@ Inventoryllä voidaan määritellä ja jaotella hallittavat koneet ja laitteet j
 ## 2. Inventory
 
 Tällä viikolla tutustuttiin kontti-ympäristössä ansiblen inventoryyn. Se oli rakennettu osioittain jossa oli reitittimet, työasemat, serverit ja valvontakohteet osioitu ja määritelty niiden muuttujat. Lisäksi oli osioitu verkon ja segmenttien mukaan sekä jaoteltu järjestelmän mukaisesti. 
-Tämä mahdollistaa kohdennetun määrittelyn, eli jos halutaan vain pelkät reitittimet tai pelkät ubuntu-kohteet määritellä niin se onnistuu. Tai vielä pidemmälle jos laajennetaan intentoryä käsittämään vaikka windows-kohteet jotka on jaoteltu työasemien ja servereiden alle niin voidaan kohdentaa pelkästään työasemiin jotka sisältävät kaikki windows-järjestelmän.
+Tämä mahdollistaa kohdennetun määrittelyn, eli jos halutaan vain pelkät reitittimet tai pelkät ubuntu-kohteet määritellä niin se onnistuu. Tai vielä pidemmälle jos laajennetaan inventoryä käsittämään vaikka windows-kohteita jotka on jaoteltu myös työasemien ja servereiden alle muiden kanssa niin voidaan kohdentaa pelkästään työasemiin jotka sisältävät kaikki windows-järjestelmän.
 
 Puhtaasti voidaan säästää aikaa ja pienentää virhemarginaalia mutta se vaatii aina testaamista että se virhe ei koske jokaista laitetta.
 
@@ -51,7 +51,7 @@ Eli muokkaamalla kohtaa muotoon
         state: started
 ```
 
-Saatiin haluttu lopputulos. Sen lisäksi piti muokata handlers - kohtaa vastaamaan tätä.
+saatiin haluttu lopputulos. Sen lisäksi piti muokata handlers - kohtaa vastaamaan tätä.
 
 [Install-SNMP-playbookin onnistunut ajo](images/snmp-install-hit.png)
 
@@ -76,23 +76,82 @@ eli käytetään kehoitteita joita pyrin välttämään snmp:n kohdalla.
 
 ## 4. Oma playbook
 
-Oman palvelimen asennuksen ja konfiguroinnin automatisointi Ansiblen avulla.
+Playbookin toteutin samalla tyylillä kuin snmp:n playbookin mutta käytin vain pelkästään hostina web1:stä. Sivun muokkauksessa kopioin vain inventory_hostnamen korostettuna h1:ksi. Tämä siksi että siitä selviää heti asennuskohteen nimi jos esimerkiksi playbookkia ajetaan asentamaan useita web-palvelimia. 
 
 ### 4.1 Playbookin rakenne
 
+```bash
+---
+- name: Install apache web server
+  hosts: web1
+  become: true
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+    
+    - name: Install Apache2
+      apt:
+        name: apache2
+        state: present
+
+    - name: Start and enable Apache2 service
+      ansible.builtin.sysvinit:
+        name: apache2
+        state: started
+        enabled: yes
+
+    - name: Print hostname to index.html
+      copy:
+        dest: /var/www/html/index.html
+        content: "<h1> {{ inventory_hostname }} </h1>"
+```
+
 ### 4.2 Playbookin suorittaminen ja testaus
 
+Playbookin onnistunut asennus
+
+[Install-webserver playbookin ajo](images/apache2-playbook-install.png)
+
+ja testaus client1:seltä
+
+[Webserver testaus client1:stä](images/apache2-test_from_client1.png)
 
 ## 5. Järjestelmätietojen kerääminen
 
-Järjestelmätietojen kerääminen Ansible setup -moduulilla.
+Kokeilin näitä kerätä ensin ansiblen setupilla ja sen perään kokeilin debugilla mutta kun edellisessä kohdassa kokeiltiin kirjoittaa playbookki tätä varten niin kirjoittelin display-data - playbookin jolla saan kaikki kerralla.
 
+**display-data.yml**
 
-## 6. Manuaalisen ja automatisoidun asennuksen vertailu
+```bash
+---
+- name: Display data for week04
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Display system information
+      ansible.builtin.debug:
+        msg:
+          - "Host: {{ inventory_hostname }}"
+          - "IP: {{ ansible_default_ipv4.address }}"
+          - "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+          - "CPU cores: {{ ansible_processor_cores }}"
+          - "Memory: {{ ansible_memtotal_mb }} MB"
+```
 
-Vertailu käsin tehdyn asennuksen ja Ansible-automaation välillä.
+Näin sain helposti kerättyä vaaditut tiedot taulukkoa varten
 
+|---|---|---|---|---|
+| Name | IP | OS | CPU Cores | Memory |
+| client1 | 10.10.10.101 | Ubuntu 24.04 | 16 | 30901 MB |
+| attacker | 10.10.10.200 | Kali 2026.3 | 16 | 30901 MB |
+| web1 | 10.10.20.101 | Ubuntu 24.04 | 16 | 30901 MB |
+| db1 | 10.10.20.102 | Ubuntu 24.04 | 16 | 30901 MB |
+| branch-client | 10.10.30.101 | Ubuntu 24.04 | 16 | 30901 |
 
-## 7. Yhteenveto ja pohdinta
+## 6. Analyysi
 
-Yhteenveto harjoituksesta, opituista asioista, hyödyistä ja mahdollisista ongelmista.
+Tämän viikon jälkeen ei enää tulisi mieleen alkaa keräämään käsin mitään tietoja tai asentamaan useille koneille. Keskitetysti tehdyillä asennuksilla säästetään huomattava määrä aikaa, saadaan varmuuskopioitua verkkolaitteiden konfiguraatioita ja palautettua ne tai asennettua yksittäisiin kohteisiin joku haluttu versio. 
+
+Usein myös halutaan pysyä joissain tiettyjen ohjelmien versioissa joten tällä myös estetään virheet pakettien asennuksessa kun jokaiseen saadaan se haluttu versio paketista joka ei välttämättä ole se uusin.
