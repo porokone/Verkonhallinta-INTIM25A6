@@ -1,4 +1,4 @@
-# Viikko 5 – Wireshark ja verkkoliikenteen analysointi (v1.0)
+# Viikko 5 – Wireshark ja verkkoliikenteen analysointi (v1.01)
 
 ## Osa 1 – Yle ja GeoIP
 
@@ -68,3 +68,5 @@ HTTP Basic Authentication välittää tunnukset muodossa `käyttäjätunnus:sala
 Wiresharkin HTTP-paketin Basic Credentials -tiedoista löytyivät käytetyt tunnukset:
 
 `tl1labra:Qwerty1!`
+
+[Koko tcpdump](./attachments/dump.pcap)
