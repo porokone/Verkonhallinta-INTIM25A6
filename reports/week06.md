@@ -232,5 +232,7 @@ sekä SNMP:tä käyttäisin verkkoympäristöissä koska se on kevyt, hyvin tuet
 ### Yhteenveto
 
 Jos vedetään kurssi yhteen pakettiin niin olen työn puolesta paljon käyttänyt keskitettyä valvontaa. En tosin it-puolella mutta laitospuolella ja samat lainalaisuudet pätee molempiin. Liika tieto on turhaa, keskitytään jokaisessa kohteessa vaan niissä tärkeimpiin jolloin, varsinkin isoissa järjestelmissä pystytään havannoimaan poikkeavuudet. Isosta massasta on vaikea erottaa poikkeavuutta.
+
 Nykypäivänä taas tekoäly ajaa sen puolesta että voidaan ajaa isoja massoja tietoja ja se seuloo niistä poikkeavuudet valvontaan näkyville. Minusta tämä taas on erillisen kurssin asioita mutta sen verran sivuan tässä sitä että sen määrittelyt, rajojen haut ja opetus on erityisen tärkeitä sen ympäristön pystyttämisessä. Jos esimerkiksi valvoja tietää että joku isompi, sovittu ajo on tarkoitus toteuttaa tiettynä kellonaikana niin tekoälyn malli saattaisi luulla sitä vaikka hyökkäykseksi tai resurssien loppumiseksi.
+
 Erityisesti tämä kurssi tarjosi minulle keskitetystä ylläpidosta, ehkä käytännönläheisempää näkökulmaa. Olen aina tiennyt että se toteutetaan niin mutta nyt pääsin itse sitä tekemään.
