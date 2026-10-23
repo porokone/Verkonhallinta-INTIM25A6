@@ -134,9 +134,7 @@ Tein kaksi triggeriä
 
 **Havainnot:**
 
-Triggereiden luonti oli hyvinkin yksinkertaista kun sai ensimmäisen tehtyä.
-
-![CPU-triggeri](images/zabbix-trigger-warning.png)
+Triggereiden luonti oli hyvinkin yksinkertaista kun sai ensimmäisen tehtyä ja aina voi käyttää valmiita template triggereitä mitä Zabbixissa tulee valmiina.
 
 ## 6. Hälytys- ja häiriötestit
 
