@@ -192,11 +192,11 @@ Kaikki toimi kuten kuuluukin. Ongelmia en havainnut ja asennukset sujuivat todel
 
 | Ominaisuus | SNMP | Prometheus | Zabbix |
 |---|---|---|---|
-| Tiedonkeruu | Kyselyt ja ilmoitukset | Kaapii rajapinnoista | Agentit |
+| Tiedonkeruu | Kyselyt ja ilmoitukset | Kaapii rajapinnoista | Useita vaihtoehtoja |
 | Dashboardit | Ei | Käytetään usein Grafanaa | Sisäänrakennetut dashboardit ja kuvaajat |
 | Hälytykset | Ilmoitukset, muuten vaatii erillisen järjestelmän | Säännöt ja Alert manager | Sisäänrakennetut triggerit ja ilmoitukset |
 | Käyttöönotto | Usein tuettu, vaatii erillisen valvonnan | Palvelimien ja kohteiden asennus/määrittely | Palvelimien ja kohteiden asennus/määrittely |
-| Skaalautuvuus | Huono | Hyvä, erityisesti pilvi- ja konttiympäristössä | Hyvä, tukee laajoja ympäristöjä |
+| Skaalautuvuus | Hyvä mutta vaatii oikeanlaisen ympäristön  | Hyvä, erityisesti pilvi- ja konttiympäristössä | Hyvä, tukee laajoja ympäristöjä |
 | Yrityskäyttö | Yleinen | Yleinen pilvi- ja sovellusvalvonnassa | Yleinen palvelin- ja verkonvalvonnassa |
 
 **Vertailun yhteenveto:**
@@ -229,7 +229,7 @@ ja Zabbixin palvelin- ja verkonvalvontaan
 
 **6. Mitä valvontatoimintoja lisäisit tähän ympäristöön?**
 
-sekä SNMP:tä käyttäisin niissä kohteissa joissa se on ainoa vaihtoehto laitteiden iän puolesta tai sen vaatiman keveyden puolesta. 
+sekä SNMP:tä käyttäisin verkkoympäristöissä koska se on kevyt, hyvin tuettu (etenkin vanhojen laitteiden osalta) ja voidaan käyttää mm. Prometheus+Grafana - yhdistelmää jolloin voidaan yhdistää kaikkia näitä.
 
 ### Yhteenveto
 
